@@ -10,7 +10,7 @@ sel.initialize();
 const app = express();
 
 // Set the port number for the server
-const port = 3500;
+const port = process.env.PORT || 4000;
 
 // Define a route for streaming video
 app.get('/stream-video', async (req, res) => {
