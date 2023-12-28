@@ -22,9 +22,17 @@ app.get('/stream-video', async (req, res) => {
     const videoUrl = await sel.wrapper(req.query);
 
     // Check if video URL is null, send an error response if so
-    if (videoUrl === null) {
-      res.status(500).send("Error Generating Video");
-    } else {
+    if (videoUrl === 0) {
+      res.status(442).send("Error Occured");
+    } 
+    else if(videoUrl === -1){
+      res.status(443).send("Error Generating Video");
+    }
+    else if(videoUrl === -2){
+      res.status(444).send("Forbidden Content Not Allowed!");
+    }
+    
+    else {
       // Set appropriate headers for video streaming
       res.setHeader('Content-Type', 'video/mp4');
       res.setHeader('Content-Disposition', 'inline; filename="video.mp4"');

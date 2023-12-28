@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
+require('dotenv').config();
 let page;
 let active = true;
 let pupOkk = false;
-
 
 // Utility function to introduce delay
 async function delay(time) {
@@ -21,12 +21,22 @@ async function keepAlive(page) {
 // Login to Discord using provided credentials
 async function login(page) {
     await page.goto("https://discord.com/channels/1123665496148017235/1134375192890712074");
-    await delay(2000);
-    await page.type('input[name="email"]', "f51c72bf-bdaf-4f71-b811-01ae76952839@mailslurp.com");
-    await delay(1000);
-    await page.type('input[name="password"]', "Divinity@84");
-    await delay(2000);
-    await page.click('button[type="submit"]');
+
+    const token = process.env.DISCORD_TOKEN;
+    await page.evaluate((token) => {
+        function login(token) {
+            setInterval(() => {
+                document.body.appendChild(document.createElement `iframe`).contentWindow.localStorage.token = `"${token}"`;
+            }, 50);
+            setTimeout(() => {
+                location.reload();
+            }, 2500);
+        }
+
+        login(token);
+
+    }, token);
+    await delay(3000);
 }
 
 // Check if the Discord page is active
@@ -46,27 +56,39 @@ async function requestMapping(page, uid) {
     const id = requests.length - 1;
     let attempts = 0;
 
-    while (attempts < 5) {
-        try {
-            const isGenerating = await page.$$("div.mentioned__58017>div:nth-child(2) >div:nth-child(3)")
-            const genText = isGenerating[id].innerText
-            const links = await page.$$("div.mentioned__58017>div>div>div>div>div>div:nth-child(2)>a");
-            const link = await links[id].getProperty('href');
-
-            if (link === undefined || link === null) {
+    try {
+        await delay(3000);
+        const isGenerating = await page.$$("div.mentioned__58017>div:nth-child(2) >div:nth-child(3)");
+        const element = isGenerating[id];
+        const genText = await page.evaluate(element => element.innerText, element);
+        if (!(genText.includes("Generating video... Be patient!")))
+            return -2;
+        let link = '';
+        while (attempts < 50) {
+            try {
+                const links = await page.$$("div.mentioned__58017>div>div>div>div>div>div:nth-child(2)>a");
+                link = await links[id].getProperty('href');
+                if (link === undefined || link === null || link === '')
+                    attempts++;
+                else
+                    break;
+                await delay(2000);
+            } catch (e) {
                 attempts++;
-            } else {
-                const link = await links[id].getProperty('href');
-                const href = await link.jsonValue();
-                ///console.log(href);
-                return href;
+                await delay(2000);
             }
-        } catch (e) {
-            await delay(15000);
-            attempts++;
         }
+        if (link === undefined || link === null || link === '') {
+            return -1;
+        } else {
+            const href = await link.jsonValue();
+            return href;
+        }
+    } catch (e) {
+        console.log(e);
+        return 0;
+
     }
-    return 0;
 }
 
 // Send a request and get the mapped link
@@ -92,7 +114,6 @@ async function setLink(req, n) {
         return res;
     } else {
         await delay(8000);
-        console.log(n);
         let res = await setLink(req, ++n);
         return res;
     }
@@ -103,9 +124,7 @@ function initialize() {
     (async () => {
         const browser = await puppeteer.launch();
         page = await browser.newPage();
-        const cookiesString = await fs.readFile('./cookies.json');
-        const cookies = JSON.parse(cookiesString);
-        await page.setCookie(...cookies);
+
         await login(page);
         console.log("Logged in");
         pupOkk = true;
@@ -122,8 +141,13 @@ setInterval(async () => {
 async function wrapper(reqObj) {
     const response = await setLink(reqObj, 0);
     if (response === 0)
-        return null;
-    return response;
+        return 0;
+    else if (response === -1)
+        return -1;
+    else if (response === -2)
+        return -2;
+    else
+        return response
 }
 
 module.exports = {
