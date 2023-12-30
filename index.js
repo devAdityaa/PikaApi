@@ -108,6 +108,9 @@ async function request(page, prompt, id) {
 
 // Set the link based on the request
 async function setLink(req, n) {
+    while(pupOkk!==true){
+        await delay(2000)
+    }
     if (n === 3) return false;
     if (active === true && pupOkk === true && page) {
         const res = await request(page, req.prompt, req.id);
