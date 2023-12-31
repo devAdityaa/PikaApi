@@ -149,7 +149,7 @@ async function setLink(req, n) {
 // Initialize Puppeteer and log in to Discord
 function initialize() {
     (async () => {
-        const browser = await puppeteer.launch({headless:false});
+        const browser = await puppeteer.launch();
         page = await browser.newPage();
 
         await login(page);
