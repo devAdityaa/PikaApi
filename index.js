@@ -51,7 +51,7 @@ async function isActive(page) {
 }
 
 // Map the request to a generated link
-async function requestMapping(page, uid) {
+async function requestMapping(page) {
     const requests = await page.$$("div.mentioned__58017");
     const id = requests.length - 1;
     let attempts = 0;
@@ -92,7 +92,7 @@ async function requestMapping(page, uid) {
 }
 
 // Send a request and get the mapped link
-async function request(page, prompt, id) {
+async function request(page, prompt) {
     await page.waitForSelector('div[role="textbox"]', { visible: true, timeout: 100000 });
     const text = "/create prompt: " + prompt;
     let isEmpty = await page.$$('span[data-slate-string="true"]')
@@ -107,7 +107,7 @@ async function request(page, prompt, id) {
     await page.click('div[role="textbox"]');
     await page.keyboard.press('Enter');
     await delay(2000);
-    const response = await requestMapping(page, id);
+    const response = await requestMapping(page);
     return response;
 }
 
@@ -118,7 +118,7 @@ async function setLink(req, n) {
     }
     if (n === 3) return false;
     if (active === true && pupOkk === true && page) {
-        const res = await request(page, req.prompt, req.id);
+        const res = await request(page, req.prompt);
         return res;
     } else {
         await delay(8000);
