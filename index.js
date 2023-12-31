@@ -95,10 +95,29 @@ async function requestMapping(page) {
 async function request(page, prompt) {
     await page.waitForSelector('div[role="textbox"]', { visible: true, timeout: 100000 });
     const text = "/create prompt: " + prompt;
-    let isEmpty = await page.$$('span[data-slate-string="true"]')
+    let isEmpty = await page.evaluate(() => {
+        try{
+            const element = document.querySelector('span[data-slate-string="true"]');
+            return element.innerText;
+        }
+        catch(e){
+            return null;
+        }
+        
+      });
     while(isEmpty!==null){
+        
         await delay(2000)
-        isEmpty = await page.$$('span[data-slate-string="true"]')
+        isEmpty =await page.evaluate(() => {
+            try{
+                const element = document.querySelector('span[data-slate-string="true"]');
+                return element.innerText;
+            }
+            catch(e){
+                return null;
+            }
+            
+          });
     }
     ///console.log(text);
     await page.keyboard.type(text, { delay: 50 });
@@ -130,7 +149,7 @@ async function setLink(req, n) {
 // Initialize Puppeteer and log in to Discord
 function initialize() {
     (async () => {
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({headless:false});
         page = await browser.newPage();
 
         await login(page);
