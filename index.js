@@ -95,6 +95,11 @@ async function requestMapping(page, uid) {
 async function request(page, prompt, id) {
     await page.waitForSelector('div[role="textbox"]', { visible: true, timeout: 100000 });
     const text = "/create prompt: " + prompt;
+    let isEmpty = await page.$$('span[data-slate-string="true"]')
+    while(isEmpty!==null){
+        await delay(2000)
+        isEmpty = await page.$$('span[data-slate-string="true"]')
+    }
     ///console.log(text);
     await page.keyboard.type(text, { delay: 50 });
 
