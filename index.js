@@ -151,9 +151,7 @@ async function setLink(req, n) {
 // Initialize Puppeteer and log in to Discord
 function initialize() {
     (async () => {
-        const browser = await puppeteer.launch({headless:false});
-        const context =  browser.defaultBrowserContext();
-        await context.overridePermissions("https://discord.com", ["clipboard-read"])
+        const browser = await puppeteer.launch();
         page = await browser.newPage();
 
         await login(page);
