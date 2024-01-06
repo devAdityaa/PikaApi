@@ -1,5 +1,4 @@
 const puppeteer = require('puppeteer');
-const fs = require('fs').promises;
 require('dotenv').config();
 let page;
 let active = true;
@@ -94,7 +93,8 @@ async function requestMapping(page) {
 // Send a request and get the mapped link
 async function request(page, prompt) {
     await page.waitForSelector('div[role="textbox"]', { visible: true, timeout: 100000 });
-    const text = "/create prompt: " + prompt;
+    const command = "/create prompt: ";
+    const text = prompt;
     let isEmpty = await page.evaluate(() => {
         try{
             const element = document.querySelector('span[data-slate-string="true"]');
@@ -120,7 +120,9 @@ async function request(page, prompt) {
           });
     }
     ///console.log(text);
-    await page.keyboard.type(text, { delay: 50 });
+    await page.keyboard.type(command, { delay:80 });
+    await page.keyboard.type(text);
+
 
     await delay(1000);
     await page.click('div[role="textbox"]');
@@ -149,7 +151,9 @@ async function setLink(req, n) {
 // Initialize Puppeteer and log in to Discord
 function initialize() {
     (async () => {
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({headless:false});
+        const context =  browser.defaultBrowserContext();
+        await context.overridePermissions("https://discord.com", ["clipboard-read"])
         page = await browser.newPage();
 
         await login(page);

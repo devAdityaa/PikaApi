@@ -13,7 +13,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 // Define a route for streaming video
-app.get('/stream-video', async (req, res) => {
+app.get('/generateVideo', async (req, res) => {
   try {
     // Log the received request query parameters
     ////console.log("Received", req.query);
@@ -34,11 +34,10 @@ app.get('/stream-video', async (req, res) => {
     
     else {
       // Set appropriate headers for video streaming
-      res.setHeader('Content-Type', 'video/mp4');
-      res.setHeader('Content-Disposition', 'inline; filename="video.mp4"');
+      res.setHeader('Content-Type', 'text/plain');
 
       // Pipe the video directly to the response
-      request(videoUrl).pipe(res);
+      res.send(videoUrl);
     }
   } catch (error) {
     // Handle any unexpected errors and send a 500 response
