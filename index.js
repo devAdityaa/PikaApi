@@ -120,7 +120,7 @@ async function request(page, prompt) {
           });
     }
     ///console.log(text);
-    await page.keyboard.type(command, { delay:80 });
+    await page.keyboard.type(command, { delay:10 });
     await page.keyboard.type(text);
 
 
